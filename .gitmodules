@@ -1,0 +1,16 @@
+[submodule "compilers/tvm-main"]
+	path = compilers/tvm-main
+	url = https://github.com/apache/tvm
+	ignore = untracked  # Because we'll have build.docker/
+	branch = v0.4-7219-gd36158596
+[submodule "compilers/glow-main"]
+	path = compilers/glow-main
+	url = https://github.com/pytorch/glow
+	ignore = dirty  # Because we'll also check out a different commit for folly
+[submodule "ghidra/ghidrathon"]
+	path = ghidra/ghidrathon
+	url = https://github.com/mandiant/Ghidrathon
+[submodule "compilers/nnfusion-main"]
+	path = compilers/nnfusion-main
+	url = https://github.com/microsoft/nnfusion.git
+	ignore = untracked  # Because we'll have build.docker/
