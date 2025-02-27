@@ -1,0 +1,4 @@
+/db/*.lock
+/db/*.lock~
+/db/**/projectState
+/db/**/~journal.bak

@@ -1,0 +1,10 @@
+# Add patterns of files dvc should ignore, which could improve
+# the performance. Learn more at
+# https://dvc.org/doc/user-guide/dvcignore
+
+*.bak
+
+# Don't track small files in datasets
+datasets/celeba/img_align_celeba/
+datasets/dtd/dtd/
+datasets/gtsrb/GTSRB/

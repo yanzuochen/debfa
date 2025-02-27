@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.S
+# C extensions
+*.so
+*.ll
+.npm
+# Distribution / packaging
+.Python
+env/
+build/
+build-*/
+build.*/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.conda/
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# dotenv
+.env
+
+# virtualenv
+venv/
+venv.*/
+ENV/
+
+Session.vim
+.*
+/onnx-export/
+/quantized/
+/results/*
+/eval/results/
+wandb/
+*.pt
+*.pth
+*.onnx
+/built
+/debug
+/models
+/datasets
+/built-aux
+
+!.vim
+!.ignore
+!*.dvc
+!.gitignore
+!.gitattributes
+!.dvcignore
+!.dvc
+!dvc.lock
+!.merge_file_*

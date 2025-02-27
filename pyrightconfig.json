@@ -1,0 +1,5 @@
+{
+	"extraPaths": [
+		"./compilers/tvm-main/python"
+	]
+}

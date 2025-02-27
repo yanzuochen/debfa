@@ -1,0 +1,144 @@
+schema: '2.0'
+stages:
+  build-models:
+    cmd: docker/run-in-docker.sh ./buildmodels.py
+    deps:
+    - path: buildmodels.py
+      md5: af233de8e7d607d15b6f6cf6eea0de03
+      size: 4650
+    - path: cfg.py
+      md5: 9e3e3da66a392e6185832f93ab03ef2f
+      size: 3275
+    - path: models
+      md5: e7ca395586728ffbd3db2794255e0ec2.dir
+      size: 3137848184
+      nfiles: 119
+    outs:
+    - path: built
+      md5: d0dd62335658d9814c7a7c390a935ea1.dir
+      size: 7244179720
+      nfiles: 239
+    - path: built-aux
+      md5: 2467cafcdef0db7efc7c32918498fbd1.dir
+      size: 8796824448
+      nfiles: 76
+  ghidra-import:
+    cmd: ../docker/run-in-docker.sh ghidra/import-binaries.sh
+    deps:
+    - path: ../built
+      md5: d0dd62335658d9814c7a7c390a935ea1.dir
+      size: 7244179720
+      nfiles: 239
+    - path: import-binaries.sh
+      md5: 16685dcf50a927d99e64221a262d4c04
+      size: 185
+    outs:
+    - path: db
+      md5: 8fa7ee1cba304e0a2aa1ebee2da85201.dir
+      size: 8686214187
+      nfiles: 483
+  compute-ranges:
+    cmd: ../docker/run-in-docker.sh ghidra/gen-compute-ranges.sh
+    deps:
+    - path: db
+      md5: 7bee3cb71e880e21ca22609fe89b93c3.dir
+      size: 13277762796
+      nfiles: 701
+    - path: gen-compute-ranges.sh
+      md5: b8110769a9b62a6cdaa76f2dbfe30826
+      size: 238
+    outs:
+    - path: compute-ranges
+      md5: fafcb98ef0a7ef98a79751fdb271d3bc.dir
+      size: 10104093
+      nfiles: 348
+  ghidra-export-analysis:
+    cmd: ../docker/run-in-docker.sh ghidra/export-analysis.sh
+    deps:
+    - path: db
+      md5: 8fa7ee1cba304e0a2aa1ebee2da85201.dir
+      size: 8686214187
+      nfiles: 483
+    - path: export-analysis.py
+      md5: e95a086041812fd4f0bc6ade22f08077
+      size: 1844
+    - path: export-analysis.sh
+      md5: 5b24271e4ff04045548d0d00442b5b04
+      size: 235
+    outs:
+    - path: analysis
+      md5: 139dd4c31549dafb374c68839bda3bff.dir
+      size: 2142947000
+      nfiles: 239
+  sweep2bits:
+    cmd: "mkdir -p results/bits\ndocker/run-in-docker.sh make -j $(nproc) -f tools/Makefile\
+      \ results/sweep/*.pkl\n"
+    deps:
+    - path: results/dram
+      md5: 5fd88da7d8df35ebca1f4147b7e2b82e.dir
+      size: 7980032
+      nfiles: 1
+    - path: results/sweep
+      md5: 69dc97dd535043e3df7d4a9f9a4ced3e.dir
+      size: 33912565248
+      nfiles: 142
+    - path: tools/sweep2bits.py
+      md5: 5ef0a526fa4925441c0a8cb1befc50b2
+      size: 3361
+    outs:
+    - path: results/bits
+      md5: 965013408976ace8bc07c878503da7e0.dir
+      size: 11317467154
+      nfiles: 142
+  bits2rewards:
+    cmd: "mkdir -p results/rewards\ndocker/run-in-docker.sh make -j $(nproc) -f tools/Makefile\
+      \ results/bits/*-bits.json\n"
+    deps:
+    - path: results/bits
+      md5: 965013408976ace8bc07c878503da7e0.dir
+      size: 11317467154
+      nfiles: 142
+    - path: tools/bits2rewards.py
+      md5: f26ba593d3566ef637b31651fbe8ce35
+      size: 2477
+    outs:
+    - path: results/rewards
+      md5: af5d1652fc65a879e304b37e8febc158.dir
+      size: 745697816
+      nfiles: 142
+  find-superbits:
+    cmd: "mkdir -p results/superbits; docker/run-in-docker.sh make -j $(nproc) -f\
+      \ tools/Makefile $(tools/gen_bits2superbits_out_fnames.py results/bits/*+fake*_11-*bits.json)\n"
+    deps:
+    - path: results/bits
+      md5: 965013408976ace8bc07c878503da7e0.dir
+      size: 11317467154
+      nfiles: 142
+    - path: results/dram
+      md5: 5fd88da7d8df35ebca1f4147b7e2b82e.dir
+      size: 7980032
+      nfiles: 1
+    - path: tools/bits2superbits.py
+      md5: b4512171f74ec8e2b848d4787316ebc9
+      size: 2187
+    outs:
+    - path: results/superbits
+      md5: 8369ef3a480a0e92c7bf53dacb60fcbb.dir
+      size: 52831596
+      nfiles: 168
+  rowhammer:
+    cmd: "mkdir -p results/rowhammer; docker/run-in-docker.sh make -j $(nproc) -f\
+      \ tools/rowhammer.Makefile results/superbits/*+fake*_9-*superbits.csv\n"
+    deps:
+    - path: results/superbits
+      md5: 8369ef3a480a0e92c7bf53dacb60fcbb.dir
+      size: 52831596
+      nfiles: 168
+    - path: tools/rh_attack.py
+      md5: 9bf8d2d897246bc35182c0ee21848901
+      size: 5095
+    outs:
+    - path: results/rowhammer
+      md5: b0bb4bf1a78948a5b5e5ba916744770f.dir
+      size: 8039
+      nfiles: 14

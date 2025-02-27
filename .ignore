@@ -1,0 +1,7 @@
+# For ag
+# vim: set ft=gitignore:
+
+/compilers/
+/ghidra/ghidra-app/
+/ghidra/ghidrathon/
+/ghidra/gradle-*/

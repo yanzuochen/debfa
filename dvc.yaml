@@ -1,0 +1,74 @@
+stages:
+
+  build-models:
+    cmd: docker/run-in-docker.sh ./buildmodels.py
+    deps:
+      - buildmodels.py
+      - cfg.py
+      - models
+    outs:
+      - built:
+          persist: true
+      - built-aux:
+          persist: true
+  ghidra-import:
+    wdir: ghidra
+    cmd: ../docker/run-in-docker.sh ghidra/import-binaries.sh
+    deps:
+      - import-binaries.sh
+      - ../built
+    outs:
+      - db:
+          persist: true
+  ghidra-export-analysis:
+    wdir: ghidra
+    cmd: ../docker/run-in-docker.sh ghidra/export-analysis.sh
+    deps:
+      - export-analysis.sh
+      - export-analysis.py
+      - db
+    outs:
+      - analysis
+
+  sweep2bits:
+    cmd: |
+      mkdir -p results/bits
+      docker/run-in-docker.sh make -j $(nproc) -f tools/Makefile results/sweep/*.pkl
+    deps:
+      - tools/sweep2bits.py
+      - results/sweep
+      - results/dram
+    outs:
+      - results/bits
+  find-superbits:
+    cmd: >
+      mkdir -p results/superbits;
+      docker/run-in-docker.sh make -j $(nproc) -f tools/Makefile
+      $(tools/gen_bits2superbits_out_fnames.py results/bits/*+fake*_11-*bits.json)
+    deps:
+      - tools/bits2superbits.py
+      - results/bits
+      - results/dram
+    outs:
+      - results/superbits
+  bits2rewards:
+    cmd: |
+      mkdir -p results/rewards
+      docker/run-in-docker.sh make -j $(nproc) -f tools/Makefile results/bits/*-bits.json
+    deps:
+      - tools/bits2rewards.py
+      - results/bits
+    outs:
+      - results/rewards
+
+  rowhammer:
+    # Use 10 fake sets to for RH experiments
+    cmd: >
+      mkdir -p results/rowhammer;
+      docker/run-in-docker.sh make -j $(nproc) -f tools/rowhammer.Makefile
+      results/superbits/*+fake*_9-*superbits.csv
+    deps:
+      - tools/rh_attack.py
+      - results/superbits
+    outs:
+      - results/rowhammer
